@@ -32,12 +32,41 @@ jobs:
             datafusion-comet
           )
 
+          declare -A reason_fix=(
+            ["Resource not accessible by personal access token"]="SYNC_PAT lacks repo write access | Use a classic PAT with 'repo' scope (fine-grained tokens need per-repo Contents:write)."
+            ["forbids access via a fine-grained personal access tokens"]="Org blocks long-lived fine-grained tokens | Use a classic PAT instead, or a fine-grained token with lifetime <=366 days."
+            ["diverging changes"]="Default branch has commits not in upstream | Already using --force; if this still fails, the branch may be protected -- remove branch protection on the default branch or allow force pushes for SYNC_PAT's identity."
+            ["Not Found"]="Repo or upstream relationship missing | Confirm vim89/<repo> still exists and is a registered GitHub fork (not detached)."
+          )
+
+          {
+            echo "## Fork sync report"
+            echo ""
+            echo "| Repo | Status | Reason | Suggested fix |"
+            echo "|---|---|---|---|"
+          } >> "$GITHUB_STEP_SUMMARY"
+
           status=0
           for repo in "${repos[@]}"; do
             echo "::group::Syncing vim89/$repo"
-            if ! gh repo sync "vim89/$repo"; then
-              echo "::warning::sync failed for vim89/$repo"
+            output=$(gh repo sync "vim89/$repo" --force 2>&1) && rc=0 || rc=$?
+            echo "$output"
+
+            if [ "$rc" -eq 0 ]; then
+              echo "| vim89/$repo | ✅ synced | - | - |" >> "$GITHUB_STEP_SUMMARY"
+            else
               status=1
+              reason="Unknown failure"
+              fix="See raw log for vim89/$repo in this run."
+              for pattern in "${!reason_fix[@]}"; do
+                if [[ "$output" == *"$pattern"* ]]; then
+                  reason="${reason_fix[$pattern]%% | *}"
+                  fix="${reason_fix[$pattern]#* | }"
+                  break
+                fi
+              done
+              echo "::warning::sync failed for vim89/$repo: $reason"
+              echo "| vim89/$repo | ❌ failed | $reason | $fix |" >> "$GITHUB_STEP_SUMMARY"
             fi
             echo "::endgroup::"
           done
