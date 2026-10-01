@@ -44,7 +44,7 @@ the "Summary" tab on a given workflow run.
 `main`/`master`. Getting started:
 
 ```
-brew tap vim89/git-foundry https://github.com/vim89/git-foundry
+brew tap vim89/tools https://github.com/vim89/homebrew-tools
 brew install git-foundry
 cd /path/to/target/repo
 git-foundry install
