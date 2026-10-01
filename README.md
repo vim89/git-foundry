@@ -38,10 +38,7 @@ Every run writes a markdown table to the job summary listing each repo's
 sync status, and for failures, the matched reason and a suggested fix. See
 the "Summary" tab on a given workflow run.
 
-## Git hooks
-
-`lefthook.yml` defines a `pre-push` guard that refuses a direct push from
-`main`/`master`. Getting started:
+## Getting started
 
 ```
 brew tap vim89/tools https://github.com/vim89/homebrew-tools
@@ -50,7 +47,9 @@ cd /path/to/target/repo
 git-foundry install
 ```
 
-This pulls in lefthook as a dependency and runs `lefthook install` for you.
+This pulls in lefthook as a dependency, copies `lefthook.yml` into the target
+repo, and runs `lefthook install` for you. `lefthook.yml` defines a `pre-push`
+guard that refuses a direct push from `main`/`master`.
 
 Push a feature branch instead, or override for one push with:
 
