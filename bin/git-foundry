@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Resolve the real install path (brew symlinks bin/ into the prefix) so we
+# can find the sibling share/ dir this formula installed lefthook.yml into.
+script_path="${BASH_SOURCE[0]}"
+while [ -L "$script_path" ]; do
+  link_target="$(readlink "$script_path")"
+  case "$link_target" in
+    /*) script_path="$link_target" ;;
+    *) script_path="$(dirname "$script_path")/$link_target" ;;
+  esac
+done
+GIT_FOUNDRY_SHARE="$(cd "$(dirname "$script_path")/../share/git-foundry" && pwd)"
+
+usage() {
+  echo "Usage: git-foundry install" >&2
+  echo "  Copies this formula's lefthook.yml into the current git repo and runs 'lefthook install'." >&2
+}
+
+cmd="${1:-}"
+case "$cmd" in
+  install)
+    if [ ! -d .git ]; then
+      echo "git-foundry install: not a git repo root (no .git here)." >&2
+      exit 1
+    fi
+    if [ -e lefthook.yml ]; then
+      echo "lefthook.yml already exists here -- not overwriting. Merge the pre-push 'protect-main' command from:" >&2
+      echo "  $GIT_FOUNDRY_SHARE/lefthook.yml" >&2
+      exit 1
+    fi
+    cp "$GIT_FOUNDRY_SHARE/lefthook.yml" lefthook.yml
+    lefthook install
+    echo "Installed lefthook.yml and ran 'lefthook install'."
+    ;;
+  *)
+    usage
+    exit 1
+    ;;
+esac

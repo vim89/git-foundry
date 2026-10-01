@@ -41,12 +41,16 @@ the "Summary" tab on a given workflow run.
 ## Git hooks
 
 `lefthook.yml` defines a `pre-push` guard that refuses a direct push from
-`main`/`master`. To apply it to a repo:
+`main`/`master`. Getting started:
 
-1. Install lefthook once: `brew install lefthook` (or see
-   [other install methods](https://lefthook.dev/installation/)).
-2. Copy `lefthook.yml` into the target repo (or symlink it), then run
-   `lefthook install` from inside that repo.
+```
+brew tap vim89/git-foundry https://github.com/vim89/git-foundry
+brew install git-foundry
+cd /path/to/target/repo
+git-foundry install
+```
+
+This pulls in lefthook as a dependency and runs `lefthook install` for you.
 
 Push a feature branch instead, or override for one push with:
 
