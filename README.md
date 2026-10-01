@@ -1,8 +1,12 @@
 # git-foundry
 
-Git workflow automation and best practices, for any repo: a scheduled
-fork-sync GitHub Action, plus local git hooks shared across repos. Fork it
-and adapt it to your own repos/orgs.
+Personal git workflow configs: a scheduled fork-sync job for my allowlisted
+forks, and a [lefthook](https://github.com/evilmartians/lefthook) config
+with a protected-branch guard. Both problems have mature existing tools
+([github-forks-sync-action](https://github.com/TobKed/github-forks-sync-action)
+for fork syncing, lefthook/pre-commit/simple-git-hooks for hook management)
+-- this repo is my concrete configuration of them, not a replacement for
+either, kept here so it's one clone away instead of re-derived per machine.
 
 ## Fork sync
 
@@ -36,25 +40,21 @@ the "Summary" tab on a given workflow run.
 
 ## Git hooks
 
-Shared local hooks live in `hooks/`. To apply them to a repo, clone
-git-foundry once anywhere, then from inside each repo you want to protect:
+`lefthook.yml` defines a `pre-push` guard that refuses a direct push from
+`main`/`master`. To apply it to a repo:
 
-```
-/path/to/git-foundry/install.sh
-```
+1. Install lefthook once: `brew install lefthook` (or see
+   [other install methods](https://lefthook.dev/installation/)).
+2. Copy `lefthook.yml` into the target repo (or symlink it), then run
+   `lefthook install` from inside that repo.
 
-This sets `core.hooksPath` for that repo only (a local git config, not
-`--global`), so other repos on the machine keep whatever hooks they already
-have. Run it again after `git pull`ing git-foundry updates if `hooks/`
-changed -- the config just points at the directory, so new hook files are
-picked up automatically, but you'd re-run it in a fresh clone of the target
-repo.
-
-### `pre-push`
-
-Refuses a direct push to `main`/`master`. Push a feature branch instead, or
-override for one push with:
+Push a feature branch instead, or override for one push with:
 
 ```
 ALLOW_PUSH_TO_MAIN=1 git push
 ```
+
+Note: lefthook skips every `pre-push` command when the push has no changed
+files (e.g. an empty-commit push via `git commit --allow-empty`) -- this is
+lefthook's own gating, not a bug in this config. It fires correctly for any
+push that actually moves a file.

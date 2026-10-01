@@ -1,0 +1,14 @@
+pre-push:
+  commands:
+    protect-main:
+      run: |
+        branch="$(git rev-parse --abbrev-ref HEAD)"
+        case "$branch" in
+          main|master)
+            if [ "$ALLOW_PUSH_TO_MAIN" != "1" ]; then
+              echo "Refusing direct push from protected branch '$branch'." >&2
+              echo "Push a feature branch and open a PR instead, or set ALLOW_PUSH_TO_MAIN=1 to override." >&2
+              exit 1
+            fi
+            ;;
+        esac
