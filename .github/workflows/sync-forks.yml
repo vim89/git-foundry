@@ -1,0 +1,44 @@
+name: Sync forks
+
+on:
+  schedule:
+    # 08:00 CET (UTC+1). During CEST (UTC+2, late Mar-late Oct) this
+    # effectively runs at 09:00 local time since GitHub Actions cron
+    # is always UTC and does not observe daylight saving.
+    - cron: '0 7 * * *'
+  workflow_dispatch:
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.SYNC_PAT }}
+    steps:
+      - name: Sync allowlisted forks
+        run: |
+          repos=(
+            spark
+            llm4s
+            kyo
+            typesafe4s
+            datafusion
+            spec
+            cask
+            rockthejvm-site
+            toon
+            scalasql
+            spark-xml
+            zio-spark
+            datafusion-comet
+          )
+
+          status=0
+          for repo in "${repos[@]}"; do
+            echo "::group::Syncing vim89/$repo"
+            if ! gh repo sync "vim89/$repo"; then
+              echo "::warning::sync failed for vim89/$repo"
+              status=1
+            fi
+            echo "::endgroup::"
+          done
+          exit "$status"
