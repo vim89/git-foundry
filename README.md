@@ -1,4 +1,10 @@
-# repo-sync-bot
+# git-foundry
+
+Git workflow automation and best practices, for any repo: a scheduled
+fork-sync GitHub Action, plus local git hooks shared across repos. Fork it
+and adapt it to your own repos/orgs.
+
+## Fork sync
 
 Runs on a schedule and syncs every fork
 
@@ -27,3 +33,28 @@ outright.
 Every run writes a markdown table to the job summary listing each repo's
 sync status, and for failures, the matched reason and a suggested fix. See
 the "Summary" tab on a given workflow run.
+
+## Git hooks
+
+Shared local hooks live in `hooks/`. To apply them to a repo, clone
+git-foundry once anywhere, then from inside each repo you want to protect:
+
+```
+/path/to/git-foundry/install.sh
+```
+
+This sets `core.hooksPath` for that repo only (a local git config, not
+`--global`), so other repos on the machine keep whatever hooks they already
+have. Run it again after `git pull`ing git-foundry updates if `hooks/`
+changed -- the config just points at the directory, so new hook files are
+picked up automatically, but you'd re-run it in a fresh clone of the target
+repo.
+
+### `pre-push`
+
+Refuses a direct push to `main`/`master`. Push a feature branch instead, or
+override for one push with:
+
+```
+ALLOW_PUSH_TO_MAIN=1 git push
+```

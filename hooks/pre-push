@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# Blocks direct pushes to main/master. Override for one push with:
+#   ALLOW_PUSH_TO_MAIN=1 git push
+protected_branches='^(main|master)$'
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+  branch="${remote_ref#refs/heads/}"
+  if [[ "$branch" =~ $protected_branches && -z "$ALLOW_PUSH_TO_MAIN" ]]; then
+    echo "error: refusing direct push to '$branch'." >&2
+    echo "Push a feature branch and open a PR instead, or set ALLOW_PUSH_TO_MAIN=1 to override." >&2
+    exit 1
+  fi
+done
+
+exit 0
